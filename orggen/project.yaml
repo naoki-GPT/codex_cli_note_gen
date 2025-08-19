@@ -1,0 +1,76 @@
+project:
+  name: NoteWorks
+  domain: publishing
+  mission: "与えられたテーマと文脈から、読まれるnote記事を安定的に量産する"
+  outcomes:
+    - 毎営業日1本の高品質記事を公開
+    - 30日以内に平均読了率45%以上
+    - 主要シリーズを3本立ち上げ
+  timeframe: "Q4"
+  agents_dir: orggen/agents
+  guides_dir: orggen/guides
+
+principles:
+  - 読者価値と可読性を最優先
+  - 出典明記と事実確認を徹底
+  - 釣り・扇情的表現は用いない
+  - 小さく早く検証し継続改善
+  - セキュリティとプライバシーは最小権限
+  - 再現可能な判断とKPI運用
+
+constraints:
+  tech: ["Python", "OpenAI API (gpt-image-1)"]
+  legal: ["著作権/引用の適正利用", "個人情報保護"]
+  budget: "画像生成は月間上限あり（配信用に厳選）"
+  deadline: "常時運用（公開24h以内のレビュー体制）"
+
+security_privacy:
+  data_boundary: ["公開情報", "自社一次情報", "個人のセンシティブ情報は扱わない"]
+  pii_redaction: true
+  secrets_policy: "APIキーは.env（最小権限・非公開管理）"
+  compliance: ["監査ログ", "最小権限", "出典URL明記"]
+
+evaluation:
+  kpis:
+    - ctr: "タイトルのクリック率"
+    - read_completion: "平均読了率"
+    - saves_likes: "保存/スキ数"
+    - lead_time: "企画→公開のリードタイム"
+    - corrections: "訂正/お詫び件数"
+  cadence: "日次サマリ/週次改善ブリーフ"
+
+tools_policy:
+  allowed_tools: ["Read", "Write", "Shell", "Plan"]
+  repos: ["articles", "assets", "scripts"]
+  limits:
+    shell: "破壊的操作は禁止。画像生成は承認プロンプト経由"
+
+operations:
+  start_template: "目的→読者像→期待行動→前提→成功条件→制約→最初の一手"
+  done_template: "成果物→差分→検証→残課題→次アクション"
+  consult_template: "論点→選択肢→推奨→リスク→判断依頼"
+  comms: ["日次スタンドアップ", "週次計画/レビュー"]
+
+agents_index:
+  # 走査対象（1人=1YAML）。roleは各YAMLのroleフィールドから自動グルーピング
+  glob: "orggen/agents/**/*.yaml"
+  exclude:
+    - "orggen/agents/_template.yaml"
+
+# 画像生成ユース
+image_generation:
+  model: gpt-image-1
+  script: scripts/image_generate.py
+  output_dir: assets/images
+  policy:
+    - 記事ブリーフ由来の要件に忠実
+    - 代替テキスト必須
+    - 商標/肖像/著作権の配慮
+    - セーフエリア厳守（左右6%/上8%/下10% 目安）
+    - コントラスト4.5:1確保（必要時は下地/反転）
+  workflow:
+    - ブリーフ: editor-in-chief + content-strategist（ペルソナ/タイトル/要約/キーワード確定）
+    - タイポ設計: typographer（行長・行数・サイズ・下地方針を設定）
+    - 背景生成: visual-designer（orggen/image_base.yaml を入力に生成）
+    - 文言確認: copy-editor + fact-checker（語調/誤字/権利の最終チェック）
+    - 承認: editor-in-chief（公開可否とブランド適合）

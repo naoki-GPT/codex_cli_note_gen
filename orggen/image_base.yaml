@@ -1,0 +1,259 @@
+# =========================================================
+# Meta Prompt for note アイキャッチ画像（横長推奨）
+# この記事タイトル・内容に最適化して自動レイアウト／自動タイポ調整
+# =========================================================
+
+meta_version: 1.0
+platform: note
+typographer_agent: true   # タイポグラファーエージェントに必ず渡す
+size: 1536x1024           # 既定。必要に応じて size_options から変更
+size_options: [1536x1024, 1024x1536, 1024x1024]
+
+# ---------------------------------------------------------
+# 使い方（入力変数）
+# ---------------------------------------------------------
+inputs:
+  article_title: "{{記事タイトルをそのまま入れる}}"
+  article_summary: "{{本文の要約・ポイント・読後価値（3〜5行まで）}}"
+  primary_keywords: ["{{主要キーワード1}}","{{主要キーワード2}}","{{主要キーワード3}}"]
+  audience: "{{想定読者（例：個人事業主／バックオフィス担当／ワーママ等）}}"
+  tone: "{{トーン（例：信頼・清潔・モダン・カジュアル・やさしい）}}"
+  brand_name: "{{任意。ロゴの代わりにテキスト表記も可}}"
+  brand_color_hex: "#4285F4"   # 既定。ブランドがあればその値に差し替え
+  theme_preset: "calendar_sync" # 'auto' | 'calendar_sync' | 'plain_minimal' | 'photo_header'
+  export_format: "PNG"          # "PNG" | "JPG"（背景透過不要ならどちらでも）
+  cjk_language: "ja"            # 行長・禁則の最適化に使用（ja/en）
+
+# ---------------------------------------------------------
+# レイアウト設計（プラットフォーム別最適化）
+# ---------------------------------------------------------
+layout:
+  orientation: "landscape"   # noteのOGで横長推奨
+  grid: 
+    cols: 12
+    rows: 8
+    safe_area:               # 端切れ防止。重要文字はここに収める
+      left: 6%
+      right: 6%
+      top: 8%
+      bottom: 10%
+  cropping_guard:
+    top_bottom_crop_tolerance: 6%   # 上下トリミングされても重要要素が残る
+    left_right_crop_tolerance: 4%
+  element_slots:
+    title_area:
+      anchor: "left-center"
+      col_span: [1, 7]   # 左から1列目〜7列分
+      row_span: [3, 6]   # 3行目〜6行目
+    subtitle_area:
+      anchor: "left-center"
+      col_span: [1, 6]
+      row_span: [6, 7]
+      spacing_from_title: 12   # px相当
+    brand_area:
+      anchor: "left-bottom"
+      col_span: [1, 4]
+      row_span: [7, 8]
+    visual_area:
+      anchor: "right-top"
+      col_span: [7, 12]
+      row_span: [1, 6]
+    accent_area:
+      anchor: "right-bottom"
+      col_span: [9, 12]
+      row_span: [6, 8]
+
+# ---------------------------------------------------------
+# タイポグラフィ（自動最適化ルール）
+# ---------------------------------------------------------
+typography:
+  title:
+    text: "{{article_title}}"
+    # 文字量に応じた自動調整
+    rules:
+      - if_length_ja: 
+          max_chars_per_line: 14       # 和文1行目の推奨最大
+          max_lines: 3
+          min_font_size: 48
+          max_font_size: 86
+          line_height: 1.12
+          letter_spacing_em: -0.01
+          autoscale: true
+          autowrap_by_phrase: true     # 語句単位で適切に改行
+          keep_emphasis_words: ["自動","カンタン","裏ワザ","完全ガイド","保存版"]
+      - contrast:
+          min_ratio: 4.5               # WCAG 4.5:1 以上を確保
+          strategy: "flip_or_add_shadow" # 反転 or 下地を自動生成
+  subtitle:
+    # サブは生成も可能（未入力時）
+    text_strategy:
+      mode: "generate_if_empty"
+      prompt_guidelines: 
+        - "読者の得られる具体的メリットを14〜24文字で要約"
+        - "専門用語は1語まで。やさしい日本語を優先"
+        - "名詞止めまたは『〜だけ』『〜だけ公開』等の簡潔表現も可"
+    style:
+      min_font_size: 28
+      max_font_size: 40
+      line_height: 1.18
+      weight: 600
+      color_role: "accent"
+  brand_tag:
+    enabled: true
+    text: "{{brand_name}}"
+    style:
+      font_size: 20
+      weight: 500
+      opacity: 0.9
+
+# ---------------------------------------------------------
+# カラーパレット（自動配色）
+# ---------------------------------------------------------
+color_palette:
+  primary: "{{brand_color_hex | default('#4285F4')}}"
+  base_bg: "#FFFFFF"
+  neutral_ink: "#111111"
+  accent_ink: "#1E3A8A"         # 深いブルー（読みやすさ担保）
+  neutrals: ["#F4F6F8","#E5E7EB","#D1D5DB"]
+  contrast_rules:
+    ensure_title_on_light_bg: true
+    ensure_subtitle_on_primary: true
+    auto_underlay_for_text: true   # テキストの下に半透明下地を自動生成
+
+# ---------------------------------------------------------
+# ビジュアル・モチーフ（トピックに応じて自動出し分け）
+# ---------------------------------------------------------
+visuals:
+  strategy: 
+    mode: "auto_or_preset"
+    auto_mapping_examples:
+      - topic_contains: ["カレンダー","予定","スケジュール","同期"]
+        motif: ["calendar_ui","device_mockup_laptop","device_mockup_phone","availability_badge"]
+      - topic_contains: ["自動化","スクリプト","API","関数","function"]
+        motif: ["code_snippets_braces","terminal_line","flow_nodes"]
+      - topic_contains: ["マーケ","SNS","集客","ブランディング"]
+        motif: ["chart_growth","social_icons_abstract","grid_cards"]
+      - topic_contains: ["リモート","在宅","チーム","共有"]
+        motif: ["collaboration_nodes","avatars_silhouette","doc_icons"]
+  density: "light"     # 背景モチーフは控えめ（読みやすさ優先）
+  blur_background_motifs: true
+  photo_guidance:
+    allow_stock_like: false
+    allow_illustration: true
+    device_mockups_style: "clean_flat"
+
+# ---------------------------------------------------------
+# テーマ・プリセット（参考プロンプトを進化）
+# ---------------------------------------------------------
+theme_presets:
+  calendar_sync:
+    description: "ホワイト×ブルーの斜め分割。右上にPC & スマホのカレンダー、右下にアクセント斜形。"
+    background:
+      split: 
+        type: "diagonal"
+        colors: ["#FFFFFF","{{brand_color_hex | default('#4285F4')}}"]
+        angle_deg: 12
+    visuals:
+      include: 
+        - "device_mockup_laptop: calendar app open"
+        - "device_mockup_phone: screen shows『予定あり』"
+        - "calendar_icons: simple event blocks"
+        - "code_snippets: {}, function"
+    decorations:
+      bottom_right_accent: "blue_slanted_rect"
+      bottom_left_soft_gray: true
+    copy_tone: ["信頼感","シンプル","IT向け"]
+  plain_minimal:
+    description: "余白重視。線と点の抽象装飾のみ。タイポで見せる。"
+  photo_header:
+    description: "薄い被写界深度の背景写真に半透明の下地でタイトルを載せる。"
+
+# ---------------------------------------------------------
+# 自動文言最適化ルール（要点）
+# ---------------------------------------------------------
+copy_rules:
+  title:
+    prefer_patterns: ["効果→手段","悩み→解決","名詞止め"]
+    avoid: ["過剰な絵文字","読みにくい全角英数字の連続"]
+  subtitle:
+    length_target_ja: "14〜24文字"
+    must_include_at_least_one_of: "{{primary_keywords | default([])}}"
+  microcopy:
+    availability_badge_text: "予定あり"
+    cta_optional: false
+
+# ---------------------------------------------------------
+# 出力仕様（納品物定義）
+# ---------------------------------------------------------
+output_spec:
+  deliverables:
+    - kind: "cover_image_main"
+      format: "{{export_format}}"
+      size: "{{size}}"
+    - kind: "alt_text"
+      text_instruction: "画面内容と文字を40〜80文字で的確に記述（アクセシビリティ対応）"
+    - kind: "og_title_suggest"
+      rule: "モバイルで切れにくい24文字前後・強い訴求語を1語入れる"
+  filename_strategy: 
+    pattern: "note_cover_{{slugified article_title}}_{{size}}.png"
+
+# ---------------------------------------------------------
+# 実行用メタプロンプト（このまま画像生成に渡す）
+# ---------------------------------------------------------
+prompt_template: |
+  横長スライド／noteアイキャッチ用の表紙デザインを作る。
+  入力（タイトル・要約・読者・キーワード）から、読みやすさ最優先でタイポとレイアウトを自動最適化する。
+  重要要素はセーフエリア（左右6%、上8%、下10%を内側）に収め、上下左右の想定トリミングでも可読性を維持。
+
+  【レイアウト】
+  - グリッドは12×8。タイトルは左寄せで中央〜下に強く配置、サブはその直下に。
+  - 右側に視覚モチーフ（デバイスやアイコン）を整理配置。左の文字と干渉させない。
+  - 右下にアクセント図形、左下に淡いグレー装飾（テーマが calendar_sync のとき）。
+
+  【タイポ】
+  - タイトルは{{cjk_language}}に最適化。1行あたり和文14字目安、最大3行、オートスケール。
+  - コントラスト比4.5:1以上。背景が明るいときは文字を黒系、足りなければ半透明の下地を自動生成。
+  - サブは読みやすく補助的に。本文要約から未入力時は14〜24文字で生成。専門用語は1語まで。
+
+  【配色】
+  - ベースは白、プライマリは {{brand_color_hex}}。必要に応じて濃紺をインク色に。
+  - 文字色は背景に応じて自動反転。見出し優先で強弱をつける。
+
+  【ビジュアル】
+  - theme_preset='calendar_sync' の場合：
+    ・ホワイト × ブルー（{{brand_color_hex}}）の斜め分割（角度12°）。
+    ・右上にノートPCの画面でカレンダー、隣にスマホで『予定あり』。
+    ・カレンダー上にはシンプルな予定ブロック。背景にcalendarアイコンや {} / function などの軽いコード断片を散らす。
+    ・右下にブルーの斜めアクセント、左下に淡いグレー装飾。
+  - theme_preset='plain_minimal' の場合：余白重視、抽象装飾のみ、タイポ主役。
+  - theme_preset='photo_header' の場合：写真は淡くボケ、文字下に半透明の下地を敷いて可読性確保。
+  - theme_preset='auto' の場合：article_summary と primary_keywords から最適なモチーフを選ぶ。
+
+  【コピー生成】
+  - title: 「{{article_title}}」
+  - subtitle: 入力がなければ article_summary から、読者メリットを14〜24文字で生成。primary_keywordsのうち1語を自然に含める。
+  - brand_tag: 「{{brand_name}}」があれば左下に小さく。
+
+  【エクスポート】
+  - 出力は {{size}} の {{export_format}}。アンチエイリアスを高品質で。
+  - alt_text と og用短縮タイトル案も同時に提案する。
+
+# ---------------------------------------------------------
+# 例：テーマ preset を活かした実行（サンプル入力付き）
+# ---------------------------------------------------------
+example_run:
+  inputs:
+    article_title: "Googleカレンダーを自動同期してチーム共有"
+    article_summary: "予定の詳細は伏せたまま、空き状況だけを安全に共有する手順とツール設定を解説。社外とも衝突なく連携。"
+    primary_keywords: ["同期","共有","プライバシー"]
+    audience: "チームリーダー／バックオフィス"
+    tone: "信頼・シンプル・IT"
+    brand_name: "MamaCarrie Lab"
+    brand_color_hex: "#4285F4"
+    theme_preset: "calendar_sync"
+    export_format: "PNG"
+    cjk_language: "ja"
+  expected_outputs:
+    cover_image_main: "note_cover_google_calendar_sync_1536x1024.png"
+    alt_text_example: "白とブルーの斜め分割背景に、左側へ『Googleカレンダーを自動同期してチーム共有』の黒文字タイトルと青のサブ見出し。右上にPCとスマホのカレンダー画面、右下に青い斜めのアクセント図形。"
+    og_title_suggest_example: "予定だけ共有で、安全に同期する方法"

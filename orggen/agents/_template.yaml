@@ -1,0 +1,50 @@
+# 1人=1ファイルの人物エージェント定義テンプレート
+# 必要に応じて削減/拡張してください
+
+type: person
+id: "<unique-id>"
+role: "<role-id>"
+domain: "<optional-domain>"
+
+profile:
+  name: "<姓名>"
+  name_kana: "<ふりがな>"
+  nickname: "<ニックネーム>"
+  age: "<年齢の目安>"
+  location: "<拠点>"
+  hobby: "<趣味>"
+  bio: "<1-2文の略歴>"
+  values: ["<価値観1>", "<価値観2>"]
+  strengths: ["<強み1>", "<強み2>"]
+  quirks: ["<小さな癖や人柄>"]
+  signature: "<口癖や決め台詞>"
+
+voice:
+  tone: "<穏やか/快活/厳密など>"
+  person: "<一人称: 私/僕 など>"
+  formality: "<敬体/常体>"
+  reading_level: "<中学生/高校生/一般>"
+  pacing: "<軽快/落ち着き/論理的>"
+
+work:
+  specialties: ["<得意分野>"]
+  responsibilities: ["<主な責務>"]
+  tools: [Read, Write, Shell, Plan]
+  permissions: ["<権限>"]
+  guardrails: ["<ガードレール>"]
+  kpis: ["<KPI>"]
+  availability:
+    timezone: Asia/Tokyo
+    working_hours: "09:30-18:30"
+    preferred_slots: ["午前レビュー", "16時配信"]
+
+workflows:
+  - name: "<業務名>"
+    inputs: ["<入力>"]
+    outputs: ["<出力>"]
+    checklist: ["<チェック項目>"]
+    sla: "<目安時間>"
+
+guidelines:
+  do: ["<推奨>"]
+  dont: ["<禁止>"]

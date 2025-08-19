@@ -1,0 +1,15 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated assets and content (do not commit)
+assets/
+assets/images/
+articles/
+content/
+drafts/
+.venv/
+node_modules/

@@ -1,0 +1,408 @@
+type: guide
+id: note-tone
+name: note tone & manner guide
+role: lead-writer
+description: |
+  note記事向けのトンマナ設計と実装テンプレ。読者ペルソナの痛み→共感→信頼→権威→限定訴求の
+  一本線ストーリーを、短文・要点主義で構築するための実務ガイド。
+  ユーザーが与える文脈/台本/目的に応じて、ペルソナ/痛み/ボイス/フローを動的に最適化します。
+
+article:
+  monetization: free   # free | paid | teaser（既定: free）
+  boundary_section:    # 有料境界セクションの表示条件
+    show_if: "monetization in ['paid','teaser']"
+  cta_style:
+    free:  soft
+    paid:  hard
+    teaser: mixed
+  defaults:
+    include_disclaimer: true
+
+persona:
+  primary_reader: |
+    台本や知見はあるが、スライド/資料化で手が止まる講師・発信者・実務者。
+  pains:
+    - 台本はあるのに、どこを見せれば良いか判断が止まる
+    - 構成と言い回しの迷いで手が動かない（時間が溶ける）
+    - 外注/共同作業で意図ズレが発生し、修正ループに陥る
+    - デザインや画像の扱いに不安があり、公開の確信が持てない
+  desired_outcomes:
+    - 貼るだけで“伝わる形”に変換できる明確な手順
+    - 再現性のある構成テンプレとチェックリスト
+    - 最小労力での成果（読み切り率/保存率/CTA到達の向上）
+
+personalization:
+  sources:
+    - user_context.raw_context   # 台本やブリーフ（改行/句点で区切り）
+    - user_context.meta          # 読者属性/目的/納期/制約/禁止事項
+    - project_policies           # orggen/project.yaml の方針/禁止トーン
+  extract:
+    - domain: 領域/業界（頻出名詞/用語から推定）
+    - level: 読者の経験レベル（入門/中級/上級のキーワード）
+    - blockage: 現在の詰まり（構成/時間/設計/意思決定 など）
+    - constraints: 期限/予算/規約/セキュリティ/権利制約
+    - desired: 望む結果（数値/状態/期限）
+  adapt_rules:
+    - if: level == "入門"
+      then:
+        voice.mix.empathy: "+0.1"
+        voice.mix.trust: "+0.1"
+        templates.hook_density.first_half: 1-2段落ごと
+    - if: level == "上級"
+      then:
+        voice.mix.authority: "+0.1"
+        copy_patterns.proof_blocks: ["比較表/ワークフロー/制約条件を先出し"]
+    - if: blockage == "時間"
+      then:
+        templates.progress_copy: "今ここ→残り{steps}手順"
+        reward_benefits.immediate: ["初稿の骨子5分で完成"]
+    - if: constraints contains "規約/権利"
+      then:
+        assets.image_guidelines.license_required: true
+        cta.disclaimer: |
+          本記事の内容は一例であり、成果・収益を保証するものではありません。各プラットフォーム規約・
+          著作権ライセンスを遵守し、出典を明記してください。
+
+voice:
+  mix: { authority: 0.5, empathy: 0.6, trust: 0.8, scarcity: 0.5 }
+  style:
+    - 口語8割・短文・結論先行（1文≦40字、2–3文で段落）
+    - 見出しはベネフィット明示（名詞止め可）
+    - 数字・手順・比較で根拠提示（断定的な収益保証は避ける）
+    - 画像は文章補助。面積は文章>画像、代替テキスト必須
+    - 煽りは排除。期限/枠などの限定は事実ベースで簡潔に
+  auto_tune:
+    by_section:
+      lead:      {empathy: "+0.1", trust: "+0.1"}
+      proof:     {authority: "+0.1", trust: "+0.05"}
+      cta:       {scarcity: "+0.1"}
+    max_range: { authority: [0.3, 0.8], empathy: [0.4, 0.8], trust: [0.6, 0.9], scarcity: [0.3, 0.7] }
+
+naming_rules:
+  headings:
+    lead:
+      variants: ["まず、あなたの悩みから", "はじめに", "今日の出発点"]
+      prefer: "まず、あなたの悩みから"
+    outcome:
+      variants: ["この記事で得られるもの", "本記事でできるようになること", "このあと手に入る状態", "ゴール/到達点"]
+      prefer: "この記事で得られるもの"
+    proof_social:
+      variants: ["信頼できる根拠", "第三者の裏付け", "実績と参照"]
+      prefer: "信頼できる根拠"
+    problem_why:
+      variants: ["なぜ進まないのか", "つまずきの正体", "止まる理由"]
+      prefer: "なぜ進まないのか"
+    solution_what:
+      variants: ["解決の全体像", "設計の考え方", "これからの進め方"]
+      prefer: "解決の全体像"
+    how_steps:
+      variants: ["実践手順", "やることリスト", "進め方の手順"]
+      prefer: "実践手順"
+    examples:
+      variants: ["具体例", "ケースで学ぶ", "使い方の例"]
+      prefer: "具体例"
+    proof:
+      variants: ["事例と数字", "検証データ", "比較と根拠"]
+      prefer: "事例と数字"
+    faq:
+      variants: ["よくある疑問", "反論とその回答", "つまずきへの対処"]
+      prefer: "よくある疑問"
+    boundary:
+      variants: ["無料/有料の境界", "提供範囲と移行先", "ここから先は有料"]
+      prefer: "提供範囲と移行先"
+    cta:
+      variants: ["次の一歩", "ここから行動へ", "今やること"]
+      prefer: "次の一歩"
+  selection_heuristics: |
+    ・B2B/フォーマル→「本記事でできるようになること/検証データ」を優先。
+    ・カジュアル/個人向け→「この記事で得られるもの/事例と数字/よくある疑問」。
+    ・有料導線あり→「提供範囲と移行先」。
+
+heading_generator:
+  constraints:
+    length_chars: [6, 14]
+    avoid_words: ["本質", "社会的証明", "概要", "まとめ", "について"]
+    forms_allowed: ["なぜ…", "…の始め方", "…の作り方", "…のコツ", "失敗例と回避策", "数字で見る…", "実践手順"]
+  preferences:
+    benefit_first: true
+    noun_or_question: true
+    avoid_jargon: true
+  algorithm: |
+    1) 本文から頻出名詞/動詞を抽出し、読者の痛み/望む結果を短語化。
+    2) forms_allowed から最適な型を当て、6–14字に整形。
+    3) avoid_words を含む場合は言い換え（例: 社会的証明→信頼できる根拠）。
+    4) selection_heuristics に合致しない場合は variants の prefer を採用。
+
+hooks:
+  policy: |
+    欲求喚起は“しつこいくらい”反復して良い。ただし型を回転させ、
+    同義反復を避ける（質問→未来想像→損失回避→具体ベネフィット→対比）。
+  density:
+    first_half: 1–2段落ごと
+    second_half: 2–3段落ごと
+    variation_min: 3  # 3種類以上の型を交互に使う
+  patterns:
+    - type: question
+      ex: ["今、どこで指が止まっていますか？", "今日5分あれば、どこまで進みますか？"]
+    - type: future_pacing
+      ex: ["想像してください。今夜、骨子が完成している状態を。"]
+    - type: loss_aversion
+      ex: ["明日に回すほど、台本の鮮度は落ちます。"]
+    - type: contrast
+      ex: ["従来: 2時間で10枚 → 本手法: 15分で骨子50枚"]
+    - type: identity
+      ex: ["“伝える人”は、最初の5分を惜しみません。あなたはどうしますか？"]
+
+reward_benefits:
+  immediate:
+    - 骨子（見出し＋要点18字）を5分で確保
+    - 画像候補と出典が1クリックで揃う
+  near_term:
+    - 公開までの進捗が見える（残り手順が3つ以下）
+    - 保存/シェア/CTA到達の上昇（目標: 保存≥8%/UU）
+  long_term:
+    - 再利用可能な台本→資料化パイプラインの定着
+    - 外注/チーム共有でのズレ減少と修正コスト削減
+  present_as:
+    - outcome_box: |
+        【今日の獲得物】
+        - 骨子: 1メッセージ×50枚の設計
+        - 画像候補: ライセンス/代替テキスト付き
+        - 行動計画: If-Thenで次の5分
+    - progress_text: "今ここ→残り{steps}手順"
+
+structure:
+  - key: lead
+    label: 導入（悩み→ベネフィット宣言）
+    goal: 痛みの言語化と読了メリットの即提示
+    ingredients: [痛み, 共感, 読後の到達点, 所要時間]
+  - key: proof_social
+    label: 社会的証明/権威
+    goal: 安心材料の提示（過度な誇張なし）
+    ingredients: [簡単な実績, 第三者言及, 再現条件]
+  - key: problem_why
+    label: 問題の本質（Why not）
+    goal: スキル不足ではなく「構成判断停止」が原因であると特定
+    ingredients: [詰まりの典型, 誤解訂正]
+  - key: solution_what
+    label: 解決策の全体像（What）
+    goal: ワンスライド・ワンメッセージの設計思想を提示
+    ingredients: [設計原則, 出力イメージ]
+  - key: how_steps
+    label: 手順（How）
+    goal: 今すぐ試せる手順化
+    ingredients: [準備, 入力, 章立て, 要点抽出, 画像, 最終チェック]
+  - key: examples
+    label: 事例/数字（Proof）
+    goal: 所要時間/反応などの定量例で安心感
+    ingredients: [所要時間, 枚数/変換率例, before-after]
+  - key: faq
+    label: よくある誤解/反論処理
+    goal: 実行前の不安を先回りで解消
+    ingredients: [実績ゼロ, スキル不安, 失敗例と回避]
+  - key: boundary
+    label: 無料/有料境界
+    goal: 記事内で提供する深さの線引き
+    ingredients: [無料: 仕組みの骨子/操作流れ, 有料: 完整形テンプレ/台本例/チェックリスト]
+  - key: cta
+    label: CTA/限定訴求/免責
+    goal: 次の一歩を具体的に案内。免責で期待値整合
+    ingredients: [先着/期限/条件, リンク/フォーム, 免責文]
+
+copy_patterns:
+  title_formulas:
+    - "{読者の今}を{望む状態}に—{固有名詞/手段}"
+    - "{悩み}で止まるあなたへ｜{一動作}で{得られる価値}"
+    - "{台本/素材}を{ゴール}へ：{モデル名/ツール}設計テンプレ"
+  lead_openers:
+    - "台本はあるのに、スライドが進まない。"
+    - "話すことと、見せることは、別のスキルです。"
+    - "この記事は、貼る→整う、までを一本で繋ぎます。"
+  transitions:
+    - "なぜ止まるのか。答えは単純です。"
+    - "結論からいきます。"
+    - "次に、手順です。"
+    - "数字で確かめます。"
+  proof_blocks:
+    - "所要時間：{min}分 / 枚数：{n}枚 / 保存率：{rate}%（検証条件付き）"
+    - "比較：従来 {before} → 本手法 {after}（同一台本/同一環境）"
+  anti_patterns:
+    - 成果の断定・収益の保証
+    - 著作権不明画像・出典欠落
+    - “誰でも簡単”の空疎な一般化
+
+assets:
+  image_guidelines:
+    ratio: "16:9 推奨（文章>画像の面積）"
+    alt_text: "必須。内容/意図/出典を簡潔に記述"
+    license: ["Unsplash License", "Pexels License", "Pixabay License", "CC0", "CC BY 4.0"]
+    wcag_contrast_min: 4.5
+
+cta:
+  free_vs_paid_boundary:
+    free_area: [悩みの言語化, 仕組みの骨子, 操作の流れ, ミニ手順]
+    paid_area: [完整プロンプト, 台本サンプル, チェックリスト, 仕上げ指示例]
+  variants:
+    - label: 資料テンプレの配布
+      trigger: 読了後すぐ試せる状態の読者
+      copy: "テンプレ＋台本例を配布。先着{n}名、{date}まで"
+    - label: 無料セッション
+      trigger: 実装前の不安が強い読者
+      copy: "1時間の個別設計（通常¥{price}→無料）先着{n}名"
+  disclaimer: |
+    本記事の内容は一例であり、成果・収益を保証するものではありません。実施に際しては各種法令・
+    プラットフォーム規約およびライセンスに従ってください。外部素材の出典/ライセンスを必ず明記してください。
+
+metrics_kpis:
+  - name: read_through_rate
+    target: ">= 55%"
+  - name: saves_bookmarks
+    target: ">= 8%/UU"
+  - name: cta_click_rate
+    target: ">= 6%"
+
+templates:
+  outline_markdown: |
+    # タイトル（誰の/何の悩みを/どう変えるか＋固有名詞）
+    台本を貼るだけで「伝わるスライド」に—Genspark設計プロンプト
+
+    ## {lead_heading}
+    台本はあるのに、スライドが進まない。\
+    話すことと、見せることは、別のスキルです。\
+    本記事では、貼る→整う、までを一本で繋ぎます。
+
+    ## {outcome_heading}
+    - 骨子（見出し＋要点18字）
+    - 画像候補（出典/ライセンス/代替テキスト）
+    - 行動計画（If-Thenで次の5分）
+
+    ## {social_proof_heading}
+    ・{実績サマリ} ・{第三者言及/出典URL} ・{再現条件}
+
+    ## {problem_heading}
+    スキル不足ではなく「構成判断」が止まっているだけ。
+
+    > 今、どこで指が止まっていますか？（question hook）
+
+    ## {solution_heading}
+    ワンスライド・ワンメッセージ＋自動画像の骨子を提示。
+
+    想像してください。今夜、骨子が完成している状態を。（future pacing）
+
+    ## {steps_heading}
+    1) 台本をraw_contextへ貼る 2) 章立て→要点抽出 3) 画像 4) 仕上げ指示
+    今ここ→残り{steps}手順（progress）
+
+    ## {proof_heading}
+    所要時間{min}分 / {n}枚 / 保存率{rate}%（条件明記）
+    従来: {before} → 本手法: {after}（contrast）
+
+    ## {faq_heading}
+    Q: 実績ゼロでも可能？ A: {回答}
+
+    <!-- if monetization in ['paid','teaser'] -->
+    ## {boundary_heading}
+    このラインより上が無料。完全テンプレ/台本例/チェックは有料内。
+    <!-- /if -->
+
+    ## {cta_heading}
+    <!-- if monetization == 'free' -->
+    ・気づきがあれば保存/シェア/フォローを。次に読む: {related_1} / {related_2}
+    <!-- /if -->
+    <!-- if monetization in ['paid','teaser'] -->
+    先着{n}名 / {date}まで。{リンク}
+    <!-- /if -->
+
+    ## 免責
+    {disclaimer}
+
+  blocks:
+    title_examples:
+      - "台本を貼るだけで『伝わるスライド』—Genspark設計テンプレ"
+      - "資料づくりで止まるあなたへ｜ワンスライド・ワンメッセージの作法"
+    cta_block: |
+      先着{n}名・{date}まで。今すぐ{action}。
+    disclaimer_block: |
+      ※本記事の内容は一例であり、成果・収益を保証するものではありません。実施は自己責任で行い、
+      関連法令・プラットフォーム規約・ライセンスに従ってください。
+    heading_variants:
+      lead: ["まず、あなたの悩みから", "はじめに", "今日の出発点"]
+      outcome: ["この記事で得られるもの", "本記事でできるようになること", "このあと手に入る状態", "ゴール/到達点"]
+      social_proof: ["信頼できる根拠", "第三者の裏付け", "実績と参照"]
+      problem: ["なぜ進まないのか", "つまずきの正体", "止まる理由"]
+      solution: ["解決の全体像", "設計の考え方", "これからの進め方"]
+      steps: ["実践手順", "やることリスト", "進め方の手順"]
+      proof: ["事例と数字", "検証データ", "比較と根拠"]
+      faq: ["よくある疑問", "反論とその回答", "つまずきへの対処"]
+      boundary: ["提供範囲と移行先", "無料/有料の境界", "ここから先は有料"]
+      cta: ["次の一歩", "ここから行動へ", "今やること"]
+    hook_rotator: |
+      〈欲求フレーズ例〉
+      - 今、どこで指が止まっていますか？
+      - 想像してください。今夜、骨子が完成している状態を。
+      - 明日に回すほど、台本の鮮度は落ちます。
+      - 従来: 2時間で10枚 → 本手法: 15分で骨子50枚。
+      - “伝える人”は、最初の5分を惜しみません。あなたはどうしますか？
+    outcome_box: |
+      【今日の獲得物】
+      - 骨子（見出し＋要点18字）
+      - 画像候補（出典/ライセンス/代替テキスト）
+      - 行動計画（If-Thenで次の5分）
+
+prompt_snippet:
+  goal: 台本を貼るだけで、構成/要点/画像候補/インタラクションを設計する指示塊
+  note: Genspark等のAIスライド作成画面に貼り付けて使用
+  content: |
+    context:
+      raw_context: |
+        （台本全文を貼る。改行または句点ごとに行化推奨）
+      meta:
+        voice_mix: {authority: 0.5, empathy: 0.6, trust: 0.8, scarcity: 0.5}
+        engage_density: {every_n: 8, min: 7, max: 10}
+        max_slides: 100
+        hook_density: {first_half: "1-2/段落", second_half: "2-3/段落", variation_min: 3}
+        outcome_box: true
+        article: { monetization: free }
+    instructions:
+      persona: |
+        あなたは“1枚＝1メッセージ”の資料設計者。可読性・ライセンス・法令順守を最優先。
+      selection_rules:
+        keep_if_contains: ["%", "万", "ステップ", "理由", "特典", "質問", "AI", "データ"]
+        rewrite_one_line:
+          target_len_chars_jp: [11, 18]
+          split_if_over_chars: 22
+      hooks:
+        allow_repetition: true
+        rotate_types: [question, future_pacing, loss_aversion, contrast, identity]
+      rewards:
+        include_outcome_box: true
+        immediate: ["骨子5分で完成", "画像候補＋出典明記"]
+      headings:
+        choose_from_variants: true
+        generate_if_needed: true
+        constraints:
+          length_chars: [6,14]
+          avoid_words: ["本質","社会的証明","概要","まとめ","について"]
+          prefer_benefit_first: true
+        map:
+          lead: "まず、あなたの悩みから"
+          social_proof: "信頼できる根拠"
+          problem: "なぜ進まないのか"
+          solution: "解決の全体像"
+          steps: "実践手順"
+          outcome: "この記事で得られるもの"
+          proof: "事例と数字"
+          faq: "よくある疑問"
+          boundary: "提供範囲と移行先"
+          cta: "次の一歩"
+      slide_rules:
+        canvas: "1280×720"
+        message_pt: 60
+        wcag_min: 4.5
+      image_search_rules:
+        providers: ["Unsplash", "Pexels", "Pixabay", "Openverse"]
+        license_policy:
+          allow: ["Unsplash License", "Pexels License", "Pixabay License", "CC0", "CC BY 4.0"]
+          require_attribution_if: ["CC BY 4.0"]
+    output_format_human: |
+      ### Slide {n}/{total}〈章:{chapter}〉\n**{message}**\n(visual: {provider}/{author} license:{license})
